@@ -8,7 +8,7 @@ class AnalyticTransferWizard(models.TransientModel):
     _name = 'analytic.transfer.wizard'
     _description = 'Asistente para Transferencia de Analíticas Provisionales'
     
-    sub_update_id = fields.Many2one(
+    sub_update_id = fields.One2many(
         'project.sub.update',
         string='Avance Físico',
         required=True,
