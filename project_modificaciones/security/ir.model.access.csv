@@ -1,0 +1,11 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_project_sub_update_project_user,project.sub.update.project.user,model_project_sub_update,project.group_project_user,1,1,1,1
+access_project_supervisor_area_project_user,project.supervisor.area.project.user,model_supervisor_area,project.group_project_user,1,1,1,0
+access_project_sub_update_project_manager,project.sub.update.project.manager,model_project_sub_update,project.group_project_manager,1,1,1,0
+access_license_generator,access_license_generator,model_license_generator,,1,1,1,1
+access_license_disciplina,access_license_disciplina,model_license_disciplina,,1,1,1,1
+access_planta_avance,access_planta_avance,model_planta_avance,,1,1,1,1
+access_area_avance,access_area_avance,model_area_avance,,1,1,1,1
+access_centro_trabajo_avance,access_centro_trabajo_avance,model_centro_trabajo_avance,,1,1,1,1
+access_project_sub_update_wizard,project.sub.update.wizard,model_project_sub_update_wizard,project.group_project_user,1,1,1,1
+access_analytic_transfer_wizard,analytic.transfer.wizard,model_analytic_transfer_wizard,,1,1,1,1

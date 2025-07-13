@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="project_view_form_inherit" model="ir.ui.view">
+        <field name="name">project.form.inherit</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group/field[@name='company_id']" position="after">
+                <field name="state" widget="badge"/>
+                <field name="team_id"/>
+            </xpath>
+            <xpath expr="//sheet//div" position="inside">
+                <button class="oe_stat_button" type="object" name="action_view_avances" icon="fa-file-text">
+                    <field name="sub_update_ids" widget="statinfo" string="Avances"/>
+                </button>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Avance del proyecto">
+                    <group>
+                        <field name="sale_total" widget="monetary" string="Total del pedido de venta"/>
+                        <field name="sale_actual" widget="monetary" string= "Entregado"/>
+                        <field name="sale_missing" widget="monetary" string="Por entregar"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+    
+    <record id="project_view_tree" model="ir.ui.view">
+        <field name="name">project.view.tree.inherit</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="inside">
+                <field name="sale_actual" optional="hide"/>
+                <field name="sale_missing" optional="hide"/>
+                <field name="sale_total" optional="hide"/>
+                <field name="invoiced" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_project_project_filter_inherit" model="ir.ui.view">
+        <field name="name">project.project.filter.inherit</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project_project_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='groupby_stage']" position="after">
+                <separator/>
+                <filter name="equipoventa" string="Equipo de venta" context="{'group_by': 'team_id'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="project.open_view_project_all" model="ir.actions.act_window">
+        <field name="name">Projects"</field>
+        <field name="domain">[]</field>
+    </record>
+
+    <record id="open_projects" model="ir.actions.act_window">
+        <field name="name">Project action</field>
+        <field name="res_model">project.project</field>
+        <field name="view_mode">kanban,tree,form,calendar,activity</field>
+        <field name="domain">[]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No tasks found. Let's create one!
+            </p>
+            <p>
+                Keep track of the progress of your tasks from creation to completion.<br/>
+                Collaborate efficiently by chatting in real-time or via email.
+            </p>
+        </field>
+    </record>
+</odoo>

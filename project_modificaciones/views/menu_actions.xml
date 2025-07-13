@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Desactivar menú original de proyectos -->
+    <record model="ir.ui.menu" id="project.menu_projects">
+        <field name="active" eval="False"/>
+    </record>
+    
+    <!-- Menú Especialidades -->
+    <menuitem
+        name="Especialidades"
+        id="project_tags2"
+        action="project_tags_action"
+        parent="project.menu_main_pm"
+        sequence="1"
+    />
+    
+    <!-- Menú Control -->
+    <menuitem
+        name="Control"
+        id="menu_control"
+        parent="project.menu_main_pm"
+        sequence="15"
+    />
+    
+    <!-- Submenús bajo Control -->
+    <menuitem
+        name="Supervisores"
+        id="menu_supervisor_area"
+        action="action_supervisor_area"
+        parent="menu_control"
+        sequence="2"
+    />
+
+    <menuitem 
+        name="Centro De Trabajo" 
+        id="menu_centro_avance" 
+        action="action_centro_avance" 
+        parent="menu_control" 
+        sequence="3" 
+    />
+
+    <menuitem 
+        name="Planta" 
+        id="menu_planta_avance" 
+        action="action_planta_avance" 
+        parent="menu_control" 
+        sequence="4" 
+    />
+
+    <menuitem 
+        name="Area" 
+        id="menu_area_avance" 
+        action="action_area_avance" 
+        parent="menu_control" 
+        sequence="5" 
+    />
+
+    <menuitem
+        name="Licencias"
+        id="menu_license_license"
+        action="action_license_license"
+        parent="menu_control"
+        sequence="6"
+        groups="project_modificaciones.group_license_create"
+    />
+
+    <menuitem
+        id="menu_pending_service"
+        name="Servicios Pendientes"
+        parent="menu_control"
+        action="action_pending_service"
+        sequence="7"
+        groups="project_modificaciones.group_license_create"
+    />
+    
+    <!-- Menú principal Control de Obra -->
+    <menuitem
+        id="control_obra_root"
+        name="Control De Obra"
+        sequence="30"
+        web_icon="project_modificaciones,static/description/icon.png">
+
+        <!-- Submenú Avances -->
+        <menuitem
+            id="project_sub_update"
+            name="Avances"
+            action="project_sub_update_action"
+            sequence="10"/>
+    </menuitem>
+
+</odoo>

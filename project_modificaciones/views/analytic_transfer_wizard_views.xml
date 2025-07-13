@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="analytic_transfer_wizard_view_form" model="ir.ui.view">
+        <field name="name">analytic.transfer.wizard.form</field>
+        <field name="model">analytic.transfer.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Transferir Analítica Provisional">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="sub_update_id" readonly="1"/>
+                            <field name="origin_analytic_id" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="destination_analytic_id" required="1"/>
+                            <field name="project_destination_id"/>
+                        </group>
+                    </group>
+                    <!--
+                    <notebook>
+                        <page string="Órdenes de Compra">
+                            <field name="purchase_orders" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="partner_id"/>
+                                    <field name="date_order"/>
+                                    <field name="amount_total"/>
+                                    <field name="state"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Mov. Almacen">
+                            <field name="stock_pickings" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="partner_id"/>
+                                    <field name="scheduled_date"/>
+                                    <field name="state"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Facturas">
+                            <field name="account_moves" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="partner_id"/>
+                                    <field name="invoice_date"/>
+                                    <field name="amount_total"/>
+                                    <field name="state"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Hojas de Horas">
+                            <field name="timesheets" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="employee_id"/>
+                                    <field name="date"/>
+                                    <field name="unit_amount"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Gastos">
+                            <field name="hr_expenses" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="employee_id"/>
+                                    <field name="date"/>
+                                    <field name="total_amount"/>
+                                    <field name="state"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                    -->
+                </sheet>
+                <footer>
+                    <button name="action_transfer_analytic" string="Transferir" type="object" class="btn-primary"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

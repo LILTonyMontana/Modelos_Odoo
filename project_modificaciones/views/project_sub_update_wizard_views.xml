@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista del wizard -->
+    <record id="view_project_sub_update_wizard" model="ir.ui.view">
+        <field name="name">project.sub.update.wizard.form</field>
+        <field name="model">project.sub.update.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Seleccionar avances existentes">
+                <group>
+                    <field name="project_id" readonly="1" invisible="1"/>
+                    <field name="project_analytic_account_id" readonly="1" invisible="1"/>
+                    <field name="provisional_analitica" readonly="1" invisible="1"/>
+                    <field name="sub_update_id"
+                           options="{'no_create': True, 'no_create_edit': True}"
+                           placeholder="Seleccione los avances sin asignar"
+                           context="{'search_default_pendientes_filter': 1}"
+                           />
+                </group>
+                <footer>
+                    <button string="Agregar" type="object" name="action_add_sub_updates" class="btn-primary"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                    <field name="project_partner_id" invisible="1" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción para abrir el wizard -->
+    <record id="action_update_sub_updates_wizard" model="ir.actions.act_window">
+        <field name="name">Seleccionar Avances</field>
+        <field name="res_model">project.sub.update.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

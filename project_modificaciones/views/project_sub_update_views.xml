@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="hr_hr_employee_view_form3" model="ir.ui.view">
+        <field name="name">hr.hr.employee.view.form2</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form" />
+        <field name="priority" eval="70" />
+        <field name="arch" type="xml">
+            <data>
+                <xpath expr="//form[1]/sheet[1]/group[1]/group[1]/field[@name='company_id']" position="after">
+                    <field name="supervisa" string="Supervisa Trabajos" widget="boolean_toggle" groups="base.group_system" />
+                </xpath>
+            </data>
+        </field>
+    </record>
+
+    <record id="project_sub_update_view_form" model="ir.ui.view">
+        <field name="name">project.sub.update.view.form</field>
+        <field name="model">project.sub.update</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="no_fact,fact,inc" readonly="1" />
+                    <button name="action_mark_invoiced" type="object" string="Marcar como facturado" class="btn-success" icon="fa-check" invisible="state == 'fact'" groups="project_modificaciones.group_sub_update_mark_invoiced" />
+                    <button name="action_mark_not_invoiced" type="object" string="Marcar como no facturado" class="btn-danger" icon="fa-times" invisible="state == 'no_fact'" groups="project_modificaciones.group_sub_update_mark_invoiced" />
+                    <button name="action_mark_incobrable" type="object" string="Marcar como incobrable" class="btn-mutted" icon="fa-times" groups="project_modificaciones.group_sub_update_mark_invoiced" />
+                    <button name="toggle_edit_mode" string="Editar Campos" type="object" class="oe_highlight" invisible="edit_mode" groups="project_modificaciones.group_edit_sub_update_fields"/>
+                    <button name="toggle_edit_mode" string="Bloquear Campos" type="object" invisible="not edit_mode" groups="project_modificaciones.group_edit_sub_update_fields"/>
+                    <button name="open_analytic_transfer_wizard" type="object" string="Transferir Analítica" class="oe_highlight" groups="project_modificaciones.group_license_create"/>
+                </header>
+                <sheet>
+                    <div class="float-end fs-6 border-0">
+                        <field name="serv_assig" widget="badge" decoration-muted="serv_assig == 'no_assig'" decoration-primary="serv_assig == 'asigg'" />
+                    </div>
+
+                    <div class="oe_title">
+                        <h1 class="d-flex flex-row">
+                            <field name="name"/>
+                        </h1>
+                    </div>
+
+                    <separator string="Datos Internos del servicio" />
+                    <group>
+                        <group>
+                            <field name="project_id" placeholder="Rellenar Cuando Se Tenga Una Orden De Venta" readonly="not edit_mode" />
+                        </group>
+                        <group>
+                            <field name="update_id" domain="[('project_id', '=', project_id), ('sub_update_ids', '=', False)]" readonly="not edit_mode" context="{'default_project_id': project_id}" />
+                            <!--Solo mostrara las actualizaciones del Proyecto Relacionado-->
+                        </group>
+                    </group>
+                    <h3>
+                        <field name="task_id" string="Partida" placeholder="Seleccione La Tarea" style="width: 100%" options="{'no_create': True}" readonly="not edit_mode" />
+                    </h3>
+                    <group>
+                        <group>
+                            <field name="cliente_project" options="{'no_open': True}" />
+                            <field name="disciplina" widget="many2many_tags" options="{'no_open': True, 'color_field': 'color'}" />
+                            <!--El color field carga la configuración de color de las etiquetas-->
+                            <!--<field name="analytic_distribution" widget="analytic_distribution"/>-->
+                        </group>
+                        <group>
+                            <field name="sale_order_id" />
+                            <field name="state" invisible="1" readonly="1" />
+                            <field name="analitica" readonly="1"/>
+                            <field name="provisional_analytic" invisible="project_id" context="{'set_provisional_defaults': True}"/> 
+                        </group>
+                    </group>
+
+                    <separator string="Información Producto A Entregar"/>
+                    <group>
+                        <group>
+                            <field name="producto" placeholder="Seleccionar El Producto A Trabajar" />
+                            <field name="especialidad_producto" />
+                        </group>
+                        <group>
+                            <field name="unidad_medida" />
+                            <field name="precio_unidad" />
+                        </group>
+                    </group>
+
+                    <separator string="Datos Generales Del Trabajo" />
+                    <group>
+                        <group>
+                            <field name="oc_pedido" />
+                            <field name="ct" onchange="1" />
+                            <field name="no_cotizacion" />
+                        </group>
+
+                        <group>
+                            <field name="date" />
+                            <field name="or_rfq" />
+                            <field name="especialidad_trabajo" />
+                            <field name="cliente" invisible="1" options="{'no_open': True}" />
+                            <field name="partner_id" invisible="1" options="{'no_open': True}"/>
+                            <!--Campo solo se ocupara para el domain-->
+                        </group>
+                    </group>
+
+                    <separator string="Descripción Detallada Del Trabajo"/>
+                    <group>
+                        <group>
+                            <field name="planta" domain="planta_domain" context="{'default_cliente': cliente}" />
+                            <field name="hora_inicio" widget="float_time" placeholder="Formato de 24hrs: 08:00"/>
+                            <separator string="Responsable Cliente" widget="badge"/>
+                            <field name="supervisorplanta" widget="many2one_avatar_user" domain="supervisor_domain" context="{'default_cliente': cliente}" />
+                            <!--Cliente-->
+                            <field name="licencia"/>
+                        </group>
+                        <group>
+                            <field name="area_id" domain="area_domain" context="{'default_cliente': cliente}" />
+                            <field name="hora_termino" widget="float_time" placeholder="Formato de 24hrs: 08:00"/>
+                            <separator string="Responsable Interno" widget="badge"/>
+                            <field name="responsible_id" widget="many2one_avatar_user"/>
+                            <!--Ayasa-->
+                        </group>
+                    </group>
+
+                    <separator string="Avance Actual" />
+                    <group>
+                        <group>
+                            <field name="unit_progress" widget="float" digits="[12,6]" />
+                            <field name="virtual_quant_progress" string="Unidades entregadas" widget="float" digits="[12,6]" />
+                        </group>
+                        <group>
+                            <field name="actual_progress_percentage" widget="percentage" />
+                            <field name="missing_quant" digits="[12,6]" />
+                            <field name="proj" invisible="1" />
+                            <field name="projid" invisible="1" />
+                            <field name="projname" invisible="1" />
+                        </group>
+                    </group>
+
+                    <separator string="Avance del servicio" />
+                    <group>
+                        <group>
+                            <field name="estado" invisible="1" />
+                            <field name="virtual_quant_progress" string="Unidades entregadas" digits="[12,6]" />
+                            <field name="sale_current" />
+                        </group>
+                        <group>
+                            <field name="quant_total" string="Unidades a entregar" widget="float" digits="[12,6]" />
+                            <field name="virtual_total_progress" string="Progreso total" widget="progressbar" />
+                        </group>
+                    </group>
+                    <group>
+                        <field name="created_by" widget="many2one_avatar_user" options="{'no_create': True}"/>
+                        <field name="edit_mode" invisible="1"/>
+                    </group>
+                    <group>
+                        <field name="planta_domain" invisible="1"/>
+                        <field name="area_domain" invisible="1"/>
+                        <field name="supervisor_domain" invisible="1"/>
+                    </group>
+
+                    <!--
+                    <separator string="Estado de la facturacion" />
+                    <group>
+                        <group>
+                            <field name="bitacorapmv" />
+                            <field name="numlic" string="#Bitacora/Licencia" />
+                            <field name="estimado" readonly="0" />
+                            <field name="datefact" readonly="0" />
+                            <field name="is_invoiced" invisible="1" />
+                            <field name="sale_total" />
+                        </group>
+                        <group>
+                            <field name="om" />
+                            <field name="cot" />
+                            <field name="avanceparc" readonly="0" />
+                            <field name="factura" options="{'no_edit': True, 'no_create': True}" readonly="0" />
+                            <field name="sale_actual" />
+                            <field name="sale_missing" />
+                        </group>
+
+                        <field name="domain" invisible="1" />
+                    </group>
+                    -->
+                    <separator string="Seguimiento" />
+                    <field name="write_date" string="Modificado por ult. vez" />
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" />
+                    <field name="activity_ids" />
+                    <field name="message_ids" />
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="project_sub_update_view_tree" model="ir.ui.view">
+        <field name="name">project.sub.update.view.tree</field>
+        <field name="model">project.sub.update</field>
+        <field name="arch" type="xml">
+            <tree class="o_sale_order" string="Avances físicos">
+                <header>
+                    <button name="action_mark_invoiced" type="object" string="Facturado" class="oe_stat_button" icon="fa-check" groups="project_modificaciones.group_sub_update_mark_invoiced" />
+                    <button name="action_mark_not_invoiced" type="object" string="No Facturado" icon="fa-times" groups="project_modificaciones.group_sub_update_mark_invoiced" />
+                </header>
+                <field name="name" optional="show" />
+                <field name="date" widget="date" />
+                <field name="numlic" optional="hide" />
+                <field name="cliente_project" optional="show" />
+                <field name="cliente" invisible="1" options="{'no_open': True}" optional="hide" />
+                <field name="partner_id" invisible="1" options="{'no_open': True}" optional="hide"/>
+                <field name="project_id" optional="show" />
+                <field name="disciplina" widget="many2many_tags" options="{'color_field': 'color'}" optional="show"/>
+                <field name="responsible_id" optional="show" />
+                <field name="task_id" optional="hide" />
+                <field name="producto" optional="show"/>
+                <field name="unit_progress" widget="float" digits="[12,6]" optional="show" />
+                <field name="hora_inicio" widget="float_time" optional="hide"/>
+                <field name="hora_termino" widget="float_time" optional="hide" />
+                <!--<field name="serv_assig" widget="badge" decoration-danger="serv_assig == 'no_assig'" decoration-success="serv_assig == 'assig'" optional="show" />-->
+                <field name="sale_current" sum="Total" optional="show" />
+                <field name="created_by" optional="show" />
+                <field name="bitacorapmv" optional="hide" />
+                <field name="estimado" optional="hide" />
+                <field name="avanceparc" optional="hide" />
+                <field name="cotizacion" optional="hide" />
+                <field name="om" optional="hide" />
+                <field name="factura" string="Factura" optional="hide" />
+                <field name="datefact" string="Fecha Fact." optional="hide" />
+                <field name="state" string="Estado facturacion" widget="badge" decoration-danger="state == 'no_fact'" decoration-success="state == 'fact'" optional="hide" />
+
+                <field name="state" column_invisible="True" />
+                <button name="action_mark_invoiced" type="object" class="btn btn-success" icon="fa-check" title="Marcar como facturado" invisible="state == 'fact'" groups="project_modificaciones.group_sub_update_mark_invoiced" />
+                <button name="action_mark_not_invoiced" type="object" class="btn btn-danger" icon="fa-times" title="Marcar como facturado" invisible="state == 'no_fact'" groups="project_modificaciones.group_sub_update_mark_invoiced" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="project_sub_update_view_pivot" model="ir.ui.view">
+        <field name="name">project.sub.update.view.pivot</field>
+        <field name="model">project.sub.update</field>
+        <field name="arch" type="xml">
+            <pivot string="Avances de obra">
+                <field name="date" interval="month" type="col" />
+                <field name="datefact" interval="month" />
+                <field name="cliente_project" type="row" />
+                <field name="disciplina" type="row" />
+                <field name="serv_assig" />
+                <field name="responsible_id" />
+                <field name="project_id" />
+                <field name="task_id" />
+                <field name="state" />
+                <field name="sale_current" type="measure" />
+            </pivot>
+        </field>
+    </record>
+
+
+    <record id="project_sub_update_view_graph" model="ir.ui.view">
+        <field name="name">project.sub.update.view.graph</field>
+        <field name="model">project.sub.update</field>
+        <field name="arch" type="xml">
+            <graph string="Avances de obra">
+                <field name="date" interval="month" type="col" />
+                <field name="datefact" />
+                <field name="cliente_project" type="row" />
+                <field name="disciplina" />
+                <field name="state" />
+                <field name="serv_assig" />
+                <field name="responsible_id" type="row" />
+                <field name="sale_current" type="measure" />
+            </graph>
+        </field>
+    </record>
+
+    <record id="project_sub_update_view_search" model="ir.ui.view">
+        <field name="name">project.sub.update.view.search</field>
+        <field name="model">project.sub.update</field>
+        <field name="arch" type="xml">
+            <search>
+                <filter string="Avances Llenos" name="project_filter" domain="[('project_id', '!=', False)]" />
+                <filter string="Avances Pendientes" name="pendientes_filter" domain="[('project_id', '=', False)]" />
+                <filter string="Responsable" name="responsible_filter" domain="[('responsible_id', '!=', False)]" />
+                <filter string="Fecha Avance" name="filter__date" date="date" />
+                <filter string="Fecha Fact." name="filter_datefact" date="datefact" />
+                <filter string="Con orden" name="asignado" domain="[('serv_assig', '=', 'assig')]" />
+                <filter string="Sin orden" name="noasignado" domain="[('serv_assig', '=', 'no_assig')]" />
+                <filter string="Facturado" name="filter_facturado" domain="[('state', '=', 'fact')]" />
+                <filter string="No facturado" name="filter_nofacturado" domain="[('state', '=', 'no_fact')]" />
+                <filter string="Estimado" name="filter_estimado" domain="[('estimado', '=', True)]" />
+                <filter string="No estimado" name="filter_noestimado" domain="[('state', '!=', True)]" />
+                <filter string="Mis Avances" name="my_updates" domain="[('created_by', '=', uid)]"/>
+                <filter string="Avances Creados Desde Proyecto" name="filter_createavanceproject" domain="[('producto', '=', False)]" />
+
+                <group expand="0" string="Agrupar por">
+                    <filter string="Cliente" name="client_group" context="{'group_by': 'cliente_project'}" />
+                    <filter string="Pedido" name="pedido_group" context="{'group_by': 'sale_order_id'}" />
+                    <filter string="Proyecto" name="project_group" context="{'group_by': 'project_id'}" />
+                    <filter string="Fecha" name="project_date" context="{'group_by': 'date'}" />
+                    <filter string="Fecha Facturacion" name="project_datefact" context="{'group_by': 'datefact'}" />
+                    <filter string="Especialidad" name="project_esp" context="{'group_by': 'disciplina'}" />
+                    <filter string="Responsable" name="responsible_group" context="{'group_by': 'responsible_id'}" />
+                    <filter string="Estado de orden" name="order_status_group" context="{'group_by': 'serv_assig'}" />
+                    <filter string="Estado de facturacion" name="orden_fact" context="{'group_by':'state'}" />
+                    <filter string="Estado de estimacion" name="orden_est" context="{'group_by':'estimado'}" />
+                </group>
+                <field name="name" />
+                <field name="om" string="OM" filter_domain="[('om', 'ilike', self)]" />
+                <field name="project_id" />
+                <field name="task_id" filter_domain="[('task_id', '=', self)]" />
+                <field name="responsible_id" string="Responsable" filter_domain="[('responsible_id', 'ilike', self)]" />
+                <field name="date" />
+                <field name="datefact" />
+                <field name="sale_order_id" string="Pedido" filter_domain="[('sale_order_id', 'ilike', self)]" />
+                <field name="cliente_project" />
+                <field name="analitica" />
+                <field name="avanceparc" string="Avance" filter_domain="[('avanceparc', 'ilike', self)]" />
+                <field name="numlic" string="Bitacora/Licencia" filter_domain="[('numlic', 'ilike', self)]" />
+                <field name="cot" string="#Cot/Presupuesto" filter_domain="[('cot', 'ilike', self)]" />
+            </search>
+        </field>
+    </record>
+
+    <record id="project_sub_update_action" model="ir.actions.act_window">
+        <field name="name">Avances</field>
+        <field name="res_model">project.sub.update</field>
+        <field name="view_mode">tree,pivot,form,graph</field>
+        <field name="search_view_id" ref="project_sub_update_view_search"/>
+        <field name="context">{'search_default_my_updates': 1}</field>        <!--'search_default_pendientes_filter': 1,-->
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No tags found. Let's create one!
+            </p>
+            <p>
+                Use tags to categorize your tasks.
+            </p>
+        </field>
+    </record>
+</odoo>

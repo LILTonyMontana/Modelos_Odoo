@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="seq_id_sup_update" model="ir.sequence">
+        <field name="name">Avance</field>
+        <field name="code">project.sub.update</field>
+        <field name="prefix"></field>
+        <field name="padding">2</field>
+        <field name="company_id" eval="False"/>
+    </record>
+</odoo>
