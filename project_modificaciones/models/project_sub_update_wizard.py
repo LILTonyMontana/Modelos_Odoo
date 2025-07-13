@@ -77,43 +77,46 @@ class ProjectSubUpdateWizard(models.TransientModel):
         return self._finalize_sub_update_addition()
     
     def _finalize_sub_update_addition(self):
-        """Proceso final de agregar el avance"""
-        # Buscar o crear la actualización del proyecto
-        update = self.update_id or self.env['project.update'].search(
-            [('project_id', '=', self.project_id.id)],
-            order='create_date desc',
-            limit=1
-        )
+        update = self.update_id or self.env['project.update'].create({
+            'project_id': self.project_id.id
+        })
         
-        if not update:
-            update = self.env['project.update'].create({
+        for sub in self.sub_update_id:
+            sub.write({
+                'update_id': update.id,
+                'project_id': self.project_id.id
+            })
+            
+            if not sub.task_id and sub.producto:
+                task = self._find_or_create_task(sub)
+                sub.task_id = task
+    
+    def _find_or_create_task(self, sub_update):
+        """Encuentra o crea tarea compatible"""
+        # 1. Buscar por producto en orden de venta del proyecto
+        if self.project_id.sale_order_id:
+            sale_line = self.env['sale.order.line'].search([
+                ('order_id', '=', self.project_id.sale_order_id.id),
+                ('product_id', '=', sub_update.producto.product_variant_id.id)
+            ], limit=1)
+            if sale_line:
+                return sale_line.task_id
+        
+        # 2. Buscar por nombre en tareas existentes
+        task = self.env['project.task'].search([
+            ('project_id', '=', self.project_id.id),
+            ('name', 'ilike', sub_update.producto.name)
+        ], limit=1)
+        
+        # 3. Crear nueva tarea si no existe
+        if not task:
+            task = self.env['project.task'].create({
+                'name': sub_update.producto.name,
                 'project_id': self.project_id.id,
+                'total_pieces': sub_update.unit_progress  # Inicializar con primer avance
             })
         
-        # Preparar valores para actualizar el avance
-        update_vals = {
-            'update_id': update.id,
-            'project_id': self.project_id.id,
-            'oc_pedido': self.oc_pedido,
-        }
-        
-        # Actualizar el avance
-        self.sub_update_id.write(update_vals)
-        
-        # Asignar tarea automáticamente si no existe
-        for sub in self.sub_update_id:
-            if not sub.task_id and sub.producto:
-                task = self.env['project.task'].search([
-                    ('name', 'like', f"%{sub.producto.name}"),
-                    ('project_id', '=', self.project_id.id)
-                ], limit=1)
-                if task:
-                    sub.task_id = task.id
-        
-        return {
-            'type': 'ir.actions.act_window_close',
-        }
-
+        return task
 
     """
     def open_transfer_wizard(self):

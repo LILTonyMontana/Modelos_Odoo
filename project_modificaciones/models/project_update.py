@@ -6,42 +6,104 @@ class ProjectUpdate(models.Model):
     _inherit = "project.update"
     _order = "date desc"
 
+    # Campos requeridos con valores por defecto
+    """
+    name = fields.Char(
+        string='Nombre de Actualización',
+        required=True,
+        default=lambda self: self._generate_sequence(),
+        tracking=True,
+        copy=False
+    )
+    
+    def _generate_sequence(self):
+        prefix = 'Avance'
+        sequence = self.env['ir.sequence'].next_by_code('project.update.sequence') or '0001'
+        return f"{prefix}{sequence}"
+    """
+    
+    status = fields.Selection(
+        [
+            ('on_track', 'En Camino'),
+            ('at_risk', 'En Riesgo'),
+            ('off_track', 'Fuera de Camino'),
+            ('on_hold', 'En Espera'),
+            ('closed', 'Cerrado')
+        ],
+        string='Estado',
+        required=True,
+        default='on_track'
+    )
+    
     sub_update_ids = fields.One2many(
         "project.sub.update", "update_id", string="Creación De Avances"
-    )  # Campo Para Crear Nuevos Avances Si Desde Un Principio Se Tiene Una Orden De Venta
+    )
 
     def action_add_sub_updates(self):
         self.ensure_one()
-
-        update = self.env["project.update"].search(
-            [("project_id", "=", self.project_id.id)], order="create_date desc", limit=1
-        )
-
+        
+        # Buscar la última actualización del proyecto que no esté cerrada
+        update = self.env["project.update"].search([
+            ("project_id", "=", self.project_id.id),
+            ("status", "!=", "closed")
+        ], order="create_date desc", limit=1)
+        
+        # Si no existe una actualización abierta, crear una nueva
         if not update:
-            update = self.env["project.update"].create(
-                {
-                    "project_id": self.project_id.id,
-                }
-            )
-
+            update = self.env["project.update"].create({
+                "project_id": self.project_id.id,
+                "status": "on_track"
+            })
+        
+        # Asignar todos los avances a esta actualización
         for sub in self.sub_update_ids:
-            sub.update_id = update.id
-            sub.project_id = self.project_id.id
-
-            # Buscar tarea en base al nombre del producto
+            # Si el avance ya está asignado a otra actualización, saltarlo
+            if sub.update_id and sub.update_id != update:
+                continue
+                
+            sub.write({
+                'update_id': update.id,
+                'project_id': self.project_id.id
+            })
+            
+            # Asignar tarea automáticamente si no tiene
             if not sub.task_id and sub.producto:
-                task = self.env["project.task"].search(
-                    [
-                        ("name", "=", sub.producto.name),
-                        ("project_id", "=", sub.project_id.id),
-                    ],
-                    limit=1,
-                )
-                if task:
-                    sub.task_id = task.id
+                task = self._find_or_create_task(sub)
+                sub.task_id = task.id
+        
+        # Forzar el cálculo de los campos relacionados
+        update._compute_sale_fields()
+        
+        return {
+            'type': 'ir.actions.act_window_close',
+            'context': {'default_update_id': update.id}  # Para próximas operaciones
+        }
 
-        return {"type": "ir.actions.act_window_close"}
-
+    def _find_or_create_task(self, sub_update):
+        """Encuentra o crea tarea compatible con el producto del avance"""
+        # 1. Buscar tarea existente
+        task = self.env["project.task"].search([
+            ("project_id", "=", sub_update.project_id.id),
+            "|",
+            ("name", "=ilike", sub_update.producto.name),
+            ("sale_line_id.product_id", "=", sub_update.producto.product_variant_id.id)
+        ], limit=1)
+        
+        # 2. Crear nueva tarea si no existe
+        if not task:
+            task = self.env["project.task"].create({
+                "name": sub_update.producto.name,
+                "project_id": sub_update.project_id.id,
+                "sale_line_id": False,  # No vinculada a orden de venta
+                "total_pieces": sub_update.unit_progress  # Inicializar con el primer avance
+            })
+        # 3. Para tareas existentes sin orden de venta, actualizar total_pieces si es necesario
+        elif not task.sale_line_id:
+            if task.total_pieces < sub_update.unit_progress:
+                task.total_pieces = sub_update.unit_progress
+        
+        return task
+        
     sale_current = fields.Float(
         string="Avance del subtotal", compute="_sale_current", store=True, default=0.0
     )

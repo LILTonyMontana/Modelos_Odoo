@@ -182,7 +182,7 @@
             </xpath>
         </field>
     </record>
-
+    <!--
     <record id="project_update_view_tree" model="ir.ui.view">
         <field name="name">project.update.view.tree.inherit</field>
         <field name="model">project.update</field>
@@ -193,7 +193,7 @@
             </xpath>
         </field>
     </record>
-
+    -->
     <record id="project_update_view_search" model="ir.ui.view">
         <field name="name">project.update.view.search.inherit</field>
         <field name="model">project.update</field>

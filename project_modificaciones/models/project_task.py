@@ -57,21 +57,37 @@ class Task(models.Model):
             if not u.id:
                 continue
             u.sub_update = u.env['project.sub.update'].search([('project_id.id', '=', u.project_id.id), ('task_id.id', '=', u.id)], order='id desc', limit=1)
+
+    @api.constrains('sub_update_ids')
+    def _check_units_against_so(self):
+        """Validación solo para tareas con orden de venta"""
+        for task in self:
+            if task.sale_line_id:  # Solo si tiene orden de venta
+                total_delivered = sum(task.sub_update_ids.mapped('unit_progress'))
+                if total_delivered > task.total_pieces:
+                    raise ValidationError(
+                        f"La suma de avances ({total_delivered}) "
+                        f"sobrepasa las unidades pedidas ({task.total_pieces})"
+                    )
     
-    @api.depends('sub_update_ids', 'sub_update_ids.unit_progress', 'project_id.update_ids')
+    @api.depends('sub_update_ids.unit_progress')
     def _units(self):
-        for u in self:
-            # Verifica si el registro está siendo creado (i.e., no tiene ID aún)
-            if not u.id:
-                continue
+        for task in self:
+            # Calcular el progreso actual
+            task.quant_progress = sum(task.sub_update_ids.mapped('unit_progress'))
             
-            progress = u.env['project.sub.update'].search([
-                ('project_id.id', '=', u.project_id.id),
-                ('task_id.id', '=', u.id)
-            ]).mapped('unit_progress')
-            
-            u.quant_progress = sum(progress)
+            # Para tareas sin orden de venta, actualizar total_pieces
+            if not task.sale_line_id:
+                task.total_pieces = task.quant_progress
     
+    @api.constrains('total_pieces')
+    def _check_total_pieces(self):
+        for task in self:
+            if task.sale_line_id:
+                # Para tareas con orden de venta, no permitir modificar total_pieces
+                if task.total_pieces != task.sale_line_id.product_uom_qty:
+                    raise ValidationError("No puede modificar las unidades totales en tareas vinculadas a órdenes de venta")
+        
     @api.depends('sub_update_ids', 'sub_update_ids.unit_progress', 'project_id.update_ids')
     def _progress(self):
         for u in self:
